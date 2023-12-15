@@ -23,6 +23,12 @@ const removeFromTier = async(entryId) => {
 
 };
 
+// ============= PAGES ==============
+
+const listPage = async (req, res) => {
+    res.render('app');
+};
+
 // ========= ENTRY FUNCTIONS =========
 
 // Returns a list of all entries in a given tier
@@ -105,6 +111,7 @@ const deleteTier = async(req, res) => {
 };
 
 module.exports = {
+    listPage,
     getEntries,
     createEntry,
     swapEntries,
