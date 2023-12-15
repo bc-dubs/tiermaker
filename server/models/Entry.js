@@ -22,6 +22,7 @@ const EntrySchema = new mongoose.Schema({
         type: String,
         lowercase: true,
         match: /^[a-f0-9]/,
+        default: "ffffff"
     },
     owner: {
         type: mongoose.Schema.ObjectId,

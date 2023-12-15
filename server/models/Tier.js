@@ -21,6 +21,11 @@ const TierSchema = new mongoose.Schema({
         lowercase: true,
         match: /^[a-f0-9]/,
     },
+    numEntries: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
     owner: {
         type: mongoose.Schema.ObjectId,
         required: true,
