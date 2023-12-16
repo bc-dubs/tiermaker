@@ -12,7 +12,8 @@ const newEntry = (e) => {
     e.preventDefault();
     helper.hideError();
 
-
+    const entryName = e.target.querySelector('#entryName').value;
+    helper.sendPost('entries', {name: entryName}, populateTierlist);
 }
 
 const addTier = (e) => {
@@ -27,7 +28,7 @@ const subtractTier = (e) => {
     e.preventDefault();
     helper.hideError();
 
-    helper.sendDelete('tiers', {}, populateTierlist);
+    helper.sendPost('deleteTier', {index: document.querySelectorAll('.tier').length - 1}, populateTierlist);
 }
 
 const newTierlist = (e) => {
@@ -55,8 +56,6 @@ const NewTierlistForm = (props) => {
         <form id="newListForm"
             name="newListForm"
             onSubmit={newTierlist}
-            action="/login"
-            method="POST"
             className="mainForm"
         >
             <label htmlFor="numTiers">Number of Tiers: </label>
@@ -81,8 +80,8 @@ const Tierlist = (props) => {
 }
 
 const Tier = (tier, entries) => {
-    console.log(entries);
-    const entryNodes = entries? entries.map(Entry) : "";
+    const entryNodes = entries.map(Entry);
+    console.log(`EntryNodes: ${entryNodes}`);
     return(
         <li id={tier.grade}
             className='tier'
@@ -116,7 +115,16 @@ const Pool = (props) => {
             <ol >
                 {entryNodes}
             </ol>
-            <button id="addEntryBtn" onClick={newEntry} style={{visibility: props.entries.length > 20? "hidden":"visible"}}>New Entry</button>
+            <form id="newEntryForm"
+                name="newEntryForm"
+                onSubmit={newEntry}
+                className="mainForm"
+                style={{visibility: props.entries.length > 20? "hidden":"visible"}}
+            >
+                <label htmlFor="entryName">Entry Name: </label>
+                <input id="entryName" type="text" name="entryName"/>
+                <input className = "formSubmit" type="submit" value="New Entry" />
+            </form>
         </div>
     );
 }
@@ -143,7 +151,7 @@ const populateTierlist = async () => {
     const allEntries = await fetch('/entries');
     const allEntriesData = await allEntries.json();
     console.log(allEntriesData);
-    const poolEntries = allEntriesData.entries.filter((e) => e._id === poolData.pool._id);
+    const poolEntries = allEntriesData.entries.filter((e) => e.tier === poolData.pool._id);
     ReactDOM.render(
         <Pool entries={poolEntries} />,
         document.getElementById('pool')

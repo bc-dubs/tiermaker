@@ -27,7 +27,15 @@ const findEntriesInTier = async (tierId) => {
 };
 
 const removeFromTier = async (entryId) => {
+  const targetEntry = await Entry.findOne({ _id: entryId });
+  const formerTier = await Tier.findOne({ _id: targetEntry.tier });
+  const formerTierEntries = await findEntriesInTier(formerTier._id);
 
+  for (let i = targetEntry.index + 1; i < formerTierEntries.length; i++) {
+    updateEntryIndex(formerTierEntries[i]._id, i - 1);
+  }
+
+  await Tier.findByIdAndUpdate(formerTier._id, { numEntries: formerTier.numEntries + 1 });
 };
 
 // ============= PAGES ==============
@@ -45,17 +53,17 @@ const getEntries = async (req, res) => {
 //     return res.status(400).json({ error: 'Invalid tier request!' });
 //   }
 
-//   try {
-//     const entries = findEntriesInTier(req.body.tier_id);
-//     return res.json({ entries });
-//   } catch (err) {
-//     console.log(err);
-//     return res.status(500).json({ error: 'Error retrieving data from server' });
-//   }
+  //   try {
+  //     const entries = findEntriesInTier(req.body.tier_id);
+  //     return res.json({ entries });
+  //   } catch (err) {
+  //     console.log(err);
+  //     return res.status(500).json({ error: 'Error retrieving data from server' });
+  //   }
   try {
-    const query = { owner: req.session.account._id};
+    const query = { owner: req.session.account._id };
     const entries = await Entry.find(query).sort({ index: 1 }).lean()
-        .exec();
+      .exec();
     return res.json({ entries });
   } catch (err) {
     console.log(err);
@@ -89,17 +97,17 @@ const createEntry = async (req, res) => {
   }
 };
 
-const swapEntries = async (req, res) => {
+// const swapEntries = async (req, res) => {
 
-};
+// };
 
-const moveEntry = async (req, res) => {
+// const moveEntry = async (req, res) => {
 
-};
+// };
 
-const deleteEntry = async (req, res) => {
+// const deleteEntry = async (req, res) => {
 
-};
+// };
 
 // ========= TIER FUNCTIONS =========
 
@@ -143,7 +151,29 @@ const createTier = async (req, res) => {
 };
 
 const deleteTier = async (req, res) => {
-  console.log('deleting tier');
+  if (!req.body.index) {
+    return res.status(400).json({ error: 'Deleting tier requires index' });
+  }
+
+  try {
+    const tierQuery = { index: req.body.index };
+    const tier = await Tier.findOne(tierQuery);
+
+    const entryQuery = { tier: tier._id };
+    const entries = await Entry.find(entryQuery).sort({ index: 1 }).lean()
+      .exec();
+
+    for (let i = entries.length; i > 0; i--) {
+      removeFromTier(entries[i]._id);
+      addToTier(entries[i]._id, -1);
+    }
+
+    await Tier.findByIdAndDelete(tier._id);
+    return res.status(201).json(Tier.toAPI(tier));
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'An error occured while deleting tier' });
+  }
 };
 
 // ======= TIERLIST FUNCTIONS =======
@@ -159,7 +189,6 @@ const getTierlist = async (req, res) => {
       return ({ tier, entries });
     }));
 
-    console.log(docs);
     return res.status(200).json({ tiers: docs });
   } catch (err) {
     return res.status(500).json({ error: 'An error occured while fetching tierlist' });
@@ -182,9 +211,6 @@ module.exports = {
   listPage,
   getEntries,
   createEntry,
-  swapEntries,
-  moveEntry,
-  deleteEntry,
   getTiers,
   createTier,
   deleteTier,
