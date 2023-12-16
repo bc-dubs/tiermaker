@@ -20,19 +20,21 @@ const router = (app) => {
     // Tierlist page serving
     app.get('/lists', mid.requiresLogin, Tierlist.listPage);
 
-    // Tier creation/editing
+    // Tier getting/creation/editing
     app.get('/tiers', mid.requiresLogin, Tierlist.getTiers);
     app.post('/tiers', mid.requiresLogin, Tierlist.createTier);
     app.delete('/tiers', mid.requiresLogin, Tierlist.deleteTier);
     app.post('/swapTiers', mid.requiresLogin, Tierlist.swapTiers);
 
-    // Entry creation/editing
+    // Entry getting/creation/editing
     app.get('/entries', mid.requiresLogin, Tierlist.getEntries);
     app.post('/entries', mid.requiresLogin, Tierlist.createEntry);
     app.delete('/entries', mid.requiresLogin, Tierlist.deleteEntry);
     app.post('/swapEntries', mid.requiresLogin, Tierlist.swapEntries);
     app.post('/moveEntry', mid.requiresLogin, Tierlist.moveEntry);
 
+    // Tierlist object getting/creation/editing
+    app.get('/tierlist', mid.requiresLogin, Tierlist.getTierlist);
     //404?
 };
 
