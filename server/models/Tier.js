@@ -8,7 +8,6 @@ const TierSchema = new mongoose.Schema({
     required: true,
     uppercase: true,
     trim: true,
-    unique: true,
   },
   index: { // The numerical value of this tier (0 is the top)
     type: Number,
