@@ -14,10 +14,6 @@ const TierSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  text: { // Additional label for this tier
-    type: String,
-    trim: true,
-  },
   color: { // The color of this tier, as a hex code string
     type: String,
     lowercase: true,

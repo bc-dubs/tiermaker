@@ -23,10 +23,6 @@ const AccountSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  creating: {
-    type: Boolean,
-    default: false,
-  },
   premium: {
     type: Boolean,
     default: false,
@@ -40,7 +36,6 @@ const AccountSchema = new mongoose.Schema({
 // Converting account to something we can store in Redis
 AccountSchema.statics.toAPI = (doc) => ({
   username: doc.username,
-  creating: doc.creating,
   _id: doc._id,
 });
 

@@ -15,11 +15,19 @@ const newEntry = (e) => {
 
 }
 
-const newTier = (e) => {
+const addTier = (e) => {
     e.preventDefault();
     helper.hideError();
 
+    const numTiers = document.querySelectorAll('.tier').length;
+    helper.sendPost('tiers', {grade: grades[numTiers], index: numTiers}, populateTierlist);
+}
 
+const subtractTier = (e) => {
+    e.preventDefault();
+    helper.hideError();
+
+    helper.sendDelete('tiers', {}, populateTierlist);
 }
 
 const newTierlist = (e) => {
@@ -37,6 +45,8 @@ const newTierlist = (e) => {
         helper.sendPost('tiers', {grade: grades[i], index: i});
     }
 
+    helper.sendPost('tiers', {grade: "Pool", index: -1});
+
     populateTierlist();
 }
 
@@ -50,7 +60,7 @@ const NewTierlistForm = (props) => {
             className="mainForm"
         >
             <label htmlFor="numTiers">Number of Tiers: </label>
-            <input id="numTiers" type="number" name="numTiers" min="0" />
+            <input id="numTiers" type="number" name="numTiers" min="0" max="7"/>
             <input className = "formSubmit" type="submit" value="Create new tierlist" />
         </form>
     );
@@ -60,9 +70,13 @@ const Tierlist = (props) => {
     console.log(props.tiers);
     const tierNodes = props.tiers.map(t => Tier(t.tier, t.entries));
     return(
-        <ol id="tierlist">
-            {tierNodes}
-        </ol>
+        <div id="tierlist">
+            <ol >
+                {tierNodes}
+            </ol>
+            <button id="subtractTierBtn" onClick={subtractTier} style={{visibility: props.tiers.length < 2? "hidden":"visible"}}>-</button>
+            <button id="addTierBtn" onClick={addTier} style={{visibility: props.tiers.length > 6? "hidden":"visible"}}>+</button>
+        </div>
     );
 }
 
@@ -94,6 +108,19 @@ const Entry = (entry) => {
     );
 }
 
+const Pool = (props) => {
+    console.log(props);
+    const entryNodes = props.entries.map(Entry);
+    return(
+        <div>
+            <ol >
+                {entryNodes}
+            </ol>
+            <button id="addEntryBtn" onClick={newEntry} style={{visibility: props.entries.length > 20? "hidden":"visible"}}>New Entry</button>
+        </div>
+    );
+}
+
 const populateTierlist = async () => {
     const tierlistResponse = await fetch('/tierlist');
     const tierlistData = await tierlistResponse.json();
@@ -102,6 +129,24 @@ const populateTierlist = async () => {
     ReactDOM.render(
         <Tierlist tiers={tierlistData.tiers} />,
         document.getElementById('tiers')
+    ); 
+
+    const poolResponse = await fetch('/pool');
+    const poolData = await poolResponse.json();
+    // helper.sendPost('/findEntries', {tier_id: poolData.pool._id}, (result) => {
+    //     console.log(result);
+    //     ReactDOM.render(
+    //         <Pool entries={result.entries} />,
+    //         document.getElementById('pool')
+    //     );
+    // });
+    const allEntries = await fetch('/entries');
+    const allEntriesData = await allEntries.json();
+    console.log(allEntriesData);
+    const poolEntries = allEntriesData.entries.filter((e) => e._id === poolData.pool._id);
+    ReactDOM.render(
+        <Pool entries={poolEntries} />,
+        document.getElementById('pool')
     );
     return true;
 }

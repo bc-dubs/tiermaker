@@ -24,7 +24,6 @@ const router = (app) => {
   app.get('/tiers', mid.requiresLogin, Tierlist.getTiers);
   app.post('/tiers', mid.requiresLogin, Tierlist.createTier);
   app.delete('/tiers', mid.requiresLogin, Tierlist.deleteTier);
-  app.post('/swapTiers', mid.requiresLogin, Tierlist.swapTiers);
 
   // Entry getting/creation/editing
   app.get('/entries', mid.requiresLogin, Tierlist.getEntries);
@@ -33,8 +32,9 @@ const router = (app) => {
   app.post('/swapEntries', mid.requiresLogin, Tierlist.swapEntries);
   app.post('/moveEntry', mid.requiresLogin, Tierlist.moveEntry);
 
-  // Tierlist object getting/creation/editing
+  // Tierlist and Pool object getting/creation/editing
   app.get('/tierlist', mid.requiresLogin, Tierlist.getTierlist);
+  app.get('/pool', mid.requiresLogin, Tierlist.getPool);
   // 404?
 };
 
