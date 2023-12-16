@@ -26,7 +26,7 @@ const newTierlist = (e) => {
     e.preventDefault();
     helper.hideError();
 
-    const numTiers = e.target.getElementById('#numTiers').value;
+    const numTiers = e.target.querySelector('#numTiers').value;
 
     if(!(numTiers || numTiers === 0)) {
         helper.handleError('Must specify # of tiers!');
@@ -57,6 +57,7 @@ const NewTierlistForm = (props) => {
 };
 
 const Tierlist = (props) => {
+    console.log(props.tiers);
     const tierNodes = props.tiers.map(t => Tier(t.tier, t.entries));
     return(
         <ol id="tierlist">
@@ -66,7 +67,8 @@ const Tierlist = (props) => {
 }
 
 const Tier = (tier, entries) => {
-    const entryNodes = entries.map(Entry);
+    console.log(entries);
+    const entryNodes = entries? entries.map(Entry) : "";
     return(
         <li id={tier.grade}
             className='tier'
@@ -95,17 +97,22 @@ const Entry = (entry) => {
 const populateTierlist = async () => {
     const tierlistResponse = await fetch('/tierlist');
     const tierlistData = await tierlistResponse.json();
+    console.log(tierlistData);
+    if(tierlistData.tiers.length < 1) return false;
     ReactDOM.render(
-        <Tierlist tiers={tierlistData} />,
+        <Tierlist tiers={tierlistData.tiers} />,
         document.getElementById('tiers')
     );
+    return true;
 }
 
-const init = () => {
-    ReactDOM.render(
-        <NewTierlistForm />,
-        document.getElementById('tiers')
-    );
+const init = async() => {
+    if(!(await populateTierlist())){
+        ReactDOM.render(
+            <NewTierlistForm />,
+            document.getElementById('tiers')
+        );
+    }
 }
 
 window.onload = init;

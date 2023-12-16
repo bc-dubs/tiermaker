@@ -22,45 +22,44 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/Tiermaker';
 mongoose.connect(dbURI).catch((err) => {
-    if (err) {
-        console.log('Could not connect to tiermaker database');
-        throw err;
-    }
+  if (err) {
+    console.log('Could not connect to tiermaker database');
+    throw err;
+  }
 });
 
 const redisClient = redis.createClient({
-    url: process.env.REDISCLOUD_URL,
+  url: process.env.REDISCLOUD_URL,
 });
 // Adding error handler to Redis client
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
 redisClient.connect().then(() => {
-    const app = express();
-  
-    app.use(helmet());
-    app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
-    app.use(compression());
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(bodyParser.json());
-    app.use(session({
-        key: 'sessionid',
-        store: new RedisStore({
-            client: redisClient,
-        }),
-        secret: 'Mario Kart',
-        resave: false,
-        saveUninitialized: false,
-    }));
+  const app = express();
 
-    app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));
-    app.set('view engine', 'handlebars');
-    app.set('views', `${__dirname}/../views`);
+  app.use(helmet());
+  app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
+  app.use(compression());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
+  app.use(session({
+    key: 'sessionid',
+    store: new RedisStore({
+      client: redisClient,
+    }),
+    secret: 'Mario Kart',
+    resave: false,
+    saveUninitialized: false,
+  }));
 
-    router(app);
+  app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));
+  app.set('view engine', 'handlebars');
+  app.set('views', `${__dirname}/../views`);
 
-    app.listen(port, (err) => {
-        if (err) { throw err; }
-        console.log(`Listening on port ${port}`);
-    });
+  router(app);
+
+  app.listen(port, (err) => {
+    if (err) { throw err; }
+    console.log(`Listening on port ${port}`);
+  });
 });
-    
